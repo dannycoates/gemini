@@ -1,0 +1,16 @@
+#main-header {
+  @include flex-container(row, space-between, center);
+
+  h1 {
+    margin: $grid-unit * .75 0 $grid-unit * .75 -$grid-unit * .25;
+    text-indent: -9999px;
+
+    .wordmark {
+      @include hidpi-background-image('wordmark', 296px 64px);
+      display: block;
+      height: 64px;
+      position: relative;
+      width: 296px;
+    }
+  }
+}

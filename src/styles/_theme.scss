@@ -1,0 +1,99 @@
+body {
+  background: $body-background;
+  color: $black;
+  min-height: 100vh;
+}
+
+a {
+  color: $default;
+  text-decoration: none;
+
+  .blue &,
+  .flat-blue & {
+    color: $white;
+  }
+
+  .default-background & {
+    color: $default;
+  }
+}
+
+.blue {
+  background-color: $darkest-blue-step;
+  background-image: radial-gradient(ellipse 250% 100% at center 140%, $light-blue-step 12%, $dark-blue-step 50%, $darkest-blue-step 100%);
+  color: $white;
+  position: relative;
+}
+
+.stars {
+  @include hidpi-background-image('stars', 1180px 346px);
+  background-position: center top;
+  background-repeat: no-repeat;
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: $grid-unit * 1.75;
+  z-index: 0;
+}
+
+.shifted-stars {
+  @include hidpi-background-image('stars', 1180px 346px);
+  background-color: $darkest-blue-step;
+  background-position: center top;
+  position: relative;
+}
+
+.default-background {
+  background: $body-background;
+  color: $black;
+  position: relative;
+}
+
+.transparent-container {
+  background: $transparent-white-1;
+  color: $white;
+  margin: $grid-unit * 2 0;
+  padding: $grid-unit * .25 0;
+}
+
+.flat-blue {
+  background: $darkest-blue-step;
+  color: $white;
+}
+
+.mozilla-logo {
+  @include hidpi-background-image('mozilla-blue', 77px 20px);
+  background-repeat: no-repeat;
+  flex: 0 0 77px;
+  height: 20px;
+  position: relative;
+  top: -3px;
+  width: 77px;
+
+  .blue & {
+    @include hidpi-background-image('mozilla', 77px 20px);
+  }
+
+  .default-background & {
+    @include hidpi-background-image('mozilla-blue', 77px 20px);
+  }
+}
+
+.firefox-icon {
+  background: url('../images/fox.svg');
+}
+
+.add-on-icon {
+  background: url('../images/add-on.svg');
+  left: 9px;
+  top: -2px;
+}
+
+.test-pilot-icon {
+  background: url('../images/testpilot.svg');
+}
+
+.chat-icon {
+  background: url('../images/chat-icon.svg');
+}

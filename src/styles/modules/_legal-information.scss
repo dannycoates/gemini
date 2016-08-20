@@ -1,0 +1,25 @@
+.legal-information {
+  font-size: $font-unit;
+  line-height: $line-unit;
+  margin: $grid-unit 0;
+  padding: 0 $grid-unit * .5 $grid-unit * .5;
+  position: relative;
+  text-align: center;
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+.legal-container {
+  .legal {
+    background-color: $legal-background;
+    padding: 1em;
+  }
+
+  h1 {
+    font-size: $font-unit * 3.5;
+    font-weight: 300;
+    margin-top: $grid-unit * 2;
+  }
+}
