@@ -15,7 +15,7 @@ export default Router.extend({
     'legacy(/)': 'legacy',
     '404': 'notFound',
     'share(/)': 'share',
-    'error': 'error',
+    'error(/)': 'error',
     'onboarding(/)': 'onboarding',
     '(*path)': 'notFound'
   },

@@ -281,7 +281,7 @@ function writeExperimentYAML(experiment) {
 gulp.task('experiments-json', function generateStaticAPITask() {
   return gulp.src(CONTENT_SRC_PATH + 'experiments/*.yaml')
     .pipe(buildExperimentsJSON('experiments'))
-    .pipe(gulp.dest(pathutil.join(STATIC_PATH, '..', 'api')));
+    .pipe(gulp.dest(DEST_PATH + '/api'));
 });
 
 function buildExperimentsJSON(path) {
@@ -317,7 +317,7 @@ function buildExperimentsJSON(path) {
 gulp.task('notifications-json', function() {
   return gulp.src(CONTENT_SRC_PATH + 'notifications/*.yaml')
     .pipe(buildNotificationsJSON('notifications'))
-    .pipe(gulp.dest(pathutil.join(STATIC_PATH, '..', 'api')));
+    .pipe(gulp.dest(DEST_PATH + '/api'));
 });
 
 function buildNotificationsJSON(path) {
@@ -341,7 +341,15 @@ function buildNotificationsJSON(path) {
 gulp.task('copy-html', function() {
   const paths = fs.readdirSync(CONTENT_SRC_PATH + 'experiments')
     .map(f => `${DEST_PATH}/experiments/${f.replace('.yaml', '')}`)
-    .concat([DEST_PATH, DEST_PATH + '/experiments', DEST_PATH + '/onboarding']);
+    .concat([
+      DEST_PATH,
+      DEST_PATH + '/experiments',
+      DEST_PATH + '/onboarding',
+      DEST_PATH + '/home',
+      DEST_PATH + '/share',
+      DEST_PATH + '/legacy',
+      DEST_PATH + '/error'
+    ]);
   gulp.src(CONTENT_SRC_PATH + 'index.html')
     .pipe(multiDest(paths));
   gulp.src('./legal-copy/privacy-notice.html')
