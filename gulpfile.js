@@ -341,7 +341,7 @@ function buildNotificationsJSON(path) {
 gulp.task('copy-html', function() {
   const paths = fs.readdirSync(CONTENT_SRC_PATH + 'experiments')
     .map(f => `${DEST_PATH}/experiments/${f.replace('.yaml', '')}`)
-    .concat([DEST_PATH, DEST_PATH + '/experiments']);
+    .concat([DEST_PATH, DEST_PATH + '/experiments', DEST_PATH + '/onboarding']);
   gulp.src(CONTENT_SRC_PATH + 'index.html')
     .pipe(multiDest(paths));
   gulp.src('./legal-copy/privacy-notice.html')
