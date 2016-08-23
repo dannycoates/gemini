@@ -1,0 +1,4 @@
+{
+  "toolkit.telemetry.server": "http://127.0.0.1/",
+  "extensions.@testpilot-addon.SERVER_ENVIRONMENT": "local"
+}
