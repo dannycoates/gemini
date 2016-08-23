@@ -36,8 +36,6 @@ const mkdirp = require('mkdirp');
 
 const IS_DEBUG = (process.env.NODE_ENV === 'development');
 
-const BASE_URL = process.env.BASE_URL || 'http://testpilot.dev:8000';
-
 const SRC_PATH = './src/';
 
 const STATIC_PATH = './dist/static/';
@@ -293,20 +291,26 @@ function buildExperimentsJSON(path) {
 
     // Auto-generate some derivative API values expected by the frontend.
     Object.assign(experiment, {
-      url: `${BASE_URL}/api/experiments/${experiment.id}`,
-      html_url: `${BASE_URL}/experiments/${experiment.slug}`,
-      installations_url: `${BASE_URL}/api/experiments/${experiment.id}/installations/`,
-      survey_url: `https://qsurvey.mozilla.com/s3/${experiment.slug}`,
-      thumbnail: `${BASE_URL}${experiment.thumbnail}`
+      url: `/api/experiments/${experiment.id}.json`,
+      html_url: `/experiments/${experiment.slug}`,
+      installations_url: `/api/experiments/${experiment.id}/installations/`,
+      survey_url: `https://qsurvey.mozilla.com/s3/${experiment.slug}`
     });
+
+    this.push(new gutil.File({
+      path: `${path}/${experiment.id}.json`,
+      contents: new Buffer(JSON.stringify(experiment, null, 2))
+    }));
 
     out.results.push(experiment);
     cb();
   }
 
   function endStream(cb) {
-    const contents =  new Buffer(JSON.stringify(out, null, 2));
-    const file = new gutil.File({path, contents});
+    const file = new gutil.File({
+      path: `${path}.json`,
+      contents: new Buffer(JSON.stringify(out, null, 2))
+    });
     this.push(file);
     cb();
   }
