@@ -50,6 +50,7 @@
     "gulp-if": "^1.2.5",
     "gulp-multi-dest": "0.0.4",
     "gulp-rename": "^1.2.2",
+    "gulp-rev-all": "^0.8.24",
     "gulp-sass": "^2.0.4",
     "gulp-sass-lint": "^1.1.0",
     "gulp-sourcemaps": "^1.5.2",

@@ -18,6 +18,7 @@ const multiDest = require('gulp-multi-dest');
 const normalize = require('node-normalize-scss');
 const pathutil = require('path');
 const rename = require('gulp-rename');
+const RevAll = require('gulp-rev-all');
 const runSequence = require('run-sequence');
 const sass = require('gulp-sass');
 const sassLint = require('gulp-sass-lint');
@@ -38,8 +39,9 @@ const IS_DEBUG = (process.env.NODE_ENV === 'development');
 
 const SRC_PATH = './src/';
 
-const STATIC_PATH = './dist/static/';
-const DEST_PATH = pathutil.join(STATIC_PATH, '..');
+const STAGE_PATH = './stage';
+const STATIC_PATH = pathutil.join(STAGE_PATH, 'static');
+const DIST_PATH = './dist';
 
 const CONTENT_SRC_PATH = 'src/';
 const PRODUCTION_EXPERIMENTS_URL = 'https://testpilot.firefox.com/api/experiments';
@@ -85,8 +87,13 @@ gulp.task('selfie', function selfieTask() {
 
 gulp.task('clean', function cleanTask() {
   return del([
-    DEST_PATH
+    STAGE_PATH,
+    DIST_PATH
   ]);
+});
+
+gulp.task('clean:stage', function cleanTask() {
+  return del([STAGE_PATH]);
 });
 
 const legalTemplates = require('./legal-copy/legal-templates');
@@ -133,7 +140,7 @@ function commonBrowserify(sourceName, b) {
     .pipe(gulpif(!IS_DEBUG, uglify()))
     .on('error', gutil.log)
     .pipe(gulpif(IS_DEBUG, sourcemaps.write('./')))
-    .pipe(gulp.dest(STATIC_PATH + 'app/'));
+    .pipe(gulp.dest(STATIC_PATH + '/app'));
 }
 
 gulp.task('scripts', shouldLint('js-lint', 'lint'), function extraScriptsTask() {
@@ -141,7 +148,7 @@ gulp.task('scripts', shouldLint('js-lint', 'lint'), function extraScriptsTask() 
     .pipe(gulpif(IS_DEBUG, sourcemaps.init({loadMaps: true})))
     .pipe(gulpif(!IS_DEBUG, uglify()))
     .pipe(gulpif(IS_DEBUG, sourcemaps.write('./')))
-    .pipe(gulp.dest(STATIC_PATH + 'scripts'));
+    .pipe(gulp.dest(STATIC_PATH + '/scripts'));
 });
 
 gulp.task('styles', shouldLint('sass-lint', 'sass-lint'), function stylesTask() {
@@ -156,7 +163,7 @@ gulp.task('styles', shouldLint('sass-lint', 'sass-lint'), function stylesTask() 
       // don't minify in development
       .pipe(gulpif(!IS_DEBUG, minifycss()))
       .pipe(gulpif(IS_DEBUG, sourcemaps.write('.')))
-    .pipe(gulp.dest(STATIC_PATH + 'styles'));
+    .pipe(gulp.dest(STATIC_PATH + '/styles'));
 });
 
 // the globbing pattern here should be cleaned up
@@ -178,17 +185,17 @@ gulp.task('images', function imagesTask() {
     // imagemin skips files https://github.com/sindresorhus/gulp-imagemin/issues/183
     // files have been optimized and rechecked into the repo
     // .pipe(cache(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
-    .pipe(gulp.dest(STATIC_PATH + 'images'));
+    .pipe(gulp.dest(STATIC_PATH + '/images'));
 });
 
 gulp.task('locales', function localesTask() {
   return gulp.src('./locales/**/*')
-    .pipe(gulp.dest(STATIC_PATH + 'locales'));
+    .pipe(gulp.dest(STATIC_PATH + '/locales'));
 });
 
 gulp.task('addon', function localesTask() {
   return gulp.src(SRC_PATH + 'addon/**/*')
-    .pipe(gulp.dest(STATIC_PATH + 'addon'));
+    .pipe(gulp.dest(STATIC_PATH + '/addon'));
 });
 
 gulp.task('import-api-content', function importContentTask(done) {
@@ -279,7 +286,7 @@ function writeExperimentYAML(experiment) {
 gulp.task('experiments-json', function generateStaticAPITask() {
   return gulp.src(CONTENT_SRC_PATH + 'experiments/*.yaml')
     .pipe(buildExperimentsJSON('experiments'))
-    .pipe(gulp.dest(DEST_PATH + '/api'));
+    .pipe(gulp.dest(STAGE_PATH + '/api'));
 });
 
 function buildExperimentsJSON(path) {
@@ -321,7 +328,7 @@ function buildExperimentsJSON(path) {
 gulp.task('notifications-json', function() {
   return gulp.src(CONTENT_SRC_PATH + 'notifications/*.yaml')
     .pipe(buildNotificationsJSON('notifications'))
-    .pipe(gulp.dest(DEST_PATH + '/api'));
+    .pipe(gulp.dest(STAGE_PATH + '/api'));
 });
 
 function buildNotificationsJSON(path) {
@@ -344,26 +351,44 @@ function buildNotificationsJSON(path) {
 
 gulp.task('copy-html', function() {
   const paths = fs.readdirSync(CONTENT_SRC_PATH + 'experiments')
-    .map(f => `${DEST_PATH}/experiments/${f.replace('.yaml', '')}`)
+    .map(f => `${STAGE_PATH}/experiments/${f.replace('.yaml', '')}`)
     .concat([
-      DEST_PATH,
-      DEST_PATH + '/experiments',
-      DEST_PATH + '/onboarding',
-      DEST_PATH + '/home',
-      DEST_PATH + '/share',
-      DEST_PATH + '/legacy',
-      DEST_PATH + '/error'
+      STAGE_PATH,
+      STAGE_PATH + '/experiments',
+      STAGE_PATH + '/onboarding',
+      STAGE_PATH + '/home',
+      STAGE_PATH + '/share',
+      STAGE_PATH + '/legacy',
+      STAGE_PATH + '/error'
     ]);
   gulp.src(CONTENT_SRC_PATH + 'index.html')
     .pipe(multiDest(paths));
   gulp.src('./legal-copy/privacy-notice.html')
     .pipe(rename('index.html'))
-    .pipe(gulp.dest(DEST_PATH + '/privacy'));
+    .pipe(gulp.dest(STAGE_PATH + '/privacy'));
   gulp.src('./legal-copy/terms-of-use.html')
     .pipe(rename('index.html'))
-    .pipe(gulp.dest(DEST_PATH + '/terms'));
+    .pipe(gulp.dest(STAGE_PATH + '/terms'));
 });
 
+gulp.task('rev', function() {
+  const revAll = new RevAll({
+    dontRenameFile: [
+      '.json',
+      'favicon.ico',
+      /static\/addon\/*/,
+      /static\/locales\/*/,
+      '.html'
+    ],
+    dontUpdateReference: [
+      /.*\.json/,
+      'favicon.ico'
+    ]
+  });
+  return gulp.src(STAGE_PATH + '/**')
+    .pipe(revAll.revision())
+    .pipe(gulp.dest(DIST_PATH));
+});
 
 gulp.task('build', function buildTask(done) {
   runSequence(
@@ -379,6 +404,8 @@ gulp.task('build', function buildTask(done) {
     'copy-html',
     'app-main',
     'app-vendor',
+    'rev',
+    'clean:stage',
     done
   );
 });
@@ -400,7 +427,7 @@ gulp.task('watch', ['build'], function watchTask() {
 // Set up a webserver for the static assets
 gulp.task('connect', function connectTask() {
   connect.server({
-    root: DEST_PATH,
+    root: DIST_PATH,
     livereload: false,
     port: 8000
   });
